@@ -49,7 +49,8 @@ const char *getPassword(struct User u)
         if (strcmp(userChecker.name, u.name) == 0)
         {
             fclose(fp);
-            char *buff = userChecker.password;
+            // Dynamically allocate memory for the password
+            char *buff = strdup(userChecker.password);
             return buff;
         }
     }

@@ -21,9 +21,9 @@ int getAccountFromFile(FILE *ptr, char name[50], struct Record *r)
 void saveAccountToFile(FILE *ptr, struct User u, struct Record r)
 {
     fprintf(ptr, "%d %d %s %d %d/%d/%d %s %d %.2lf %s\n\n",
-            &r->id,
-	    &u->id
-	    &u->name,
+            r->id,
+	    u->id
+	    u->name,
             r.accountNbr,
             r.deposit.month,
             r.deposit.day,
@@ -111,15 +111,48 @@ noAccount:
     scanf("%d/%d/%d", &r.deposit.month, &r.deposit.day, &r.deposit.year);
     printf("\nEnter the account number:");
     scanf("%d", &r.accountNbr);
+    int option;
+    int option;
+    int validInput = 0;
 
-    while (getAccountFromFile(pf, userName, &cr))
-    {
-        if (strcmp(userName, u.name) == 0 && cr.accountNbr == r.accountNbr)
-        {
+    while (getAccountFromFile(pf, userName, &cr)) {
+        if (strcmp(userName, u.name) == 0 && cr.accountNbr == r.accountNbr) {
             printf("✖ This Account already exists for this user\n\n");
-            goto noAccount;
+            printf("If you still want to make a new account, enter \"0\".\n");
+            printf("If you are an existing user and want to login, enter \"1\".\n");
+            printf("Otherwise, enter \"2\" to exit the program.\n");
+
+            do {
+                printf("Enter your choice: ");
+                scanf("%d", &option);
+
+                switch (option) {
+                    case 0:
+                        validInput = 1;
+                        // Break out of the inner loop and restart account creation.
+                        break;
+
+                    case 1:
+                        validInput = 1;
+                        printf("Redirecting to the login menu...\n");
+                        // Call the login menu or sign-in functionality here
+                        initMenu(&u);  // Assuming initMenu() handles login
+                        return;        // Exit the account creation if they go to login
+
+                    case 2:
+                        validInput = 1;
+                        printf("Thank you for visiting us!\n");
+                        fclose(pf);
+                        exit(0);
+
+                    default:
+                        printf("Insert a valid operation!\n");
+                        break;
+                }
+         } while (!validInput);
         }
     }
+
     printf("\nEnter the country:");
     scanf("%s", r.country);
     printf("\nEnter the phone number:");

@@ -71,9 +71,14 @@ void initMenu(struct User *u)
         case 1:
             while (1) {
                 loginMenu(u->name, u->password);  // Capture username and password
-
+                char *storedPassword = getPassword(*u);
+                if (storedPassword == NULL) {
+                        printf("User not found!\n");
+                        continue;
+                    }
                 if (strcmp(u->password, getPassword(*u)) == 0) {
                     printf("\n\nPassword Match!\n");
+                    free(storedPassword);
                     break;  // Exit the loop if the password is correct
                 } else {
                     printf("\nWrong password or username!\n");
@@ -81,9 +86,11 @@ void initMenu(struct User *u)
                     scanf("%s", u->password);  // Capture new password
 
                 if (strcmp(u->password, "0") == 0) {
+                    free(storedPassword); 
                     exit(1);  // Exit if the user wants to quit
                     }
                 }
+                free(storedPassword);
             }
             r = 1;
             break;
