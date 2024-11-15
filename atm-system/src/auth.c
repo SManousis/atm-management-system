@@ -9,7 +9,7 @@ void loginMenu(char a[50], char pass[50])
 
     system("clear");
     printf("\n\n\n\t\t\t\t   Bank Management System\n\t\t\t\t\t User Login:");
-    scanf("%s", a);
+    scanf("%49s", a);
 
     // disabling echo
     tcgetattr(fileno(stdin), &oflags);

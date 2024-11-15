@@ -69,15 +69,21 @@ void initMenu(struct User *u)
         switch (option)
         {
         case 1:
-            loginMenu(u->name, u->password);
-            if (strcmp(u->password, getPassword(*u)) == 0)
-            {
-                printf("\n\nPassword Match!");
-            }
-            else
-            {
-                printf("\nWrong password!! or User Name\n");
-                exit(1);
+            while (1) {
+                loginMenu(u->name, u->password);  // Capture username and password
+
+                if (strcmp(u->password, getPassword(*u)) == 0) {
+                    printf("\n\nPassword Match!\n");
+                    break;  // Exit the loop if the password is correct
+                } else {
+                    printf("\nWrong password or username!\n");
+                    printf("Re-enter the password or enter \"0\" to exit: ");
+                    scanf("%s", u->password);  // Capture new password
+
+                if (strcmp(u->password, "0") == 0) {
+                    exit(1);  // Exit if the user wants to quit
+                    }
+                }
             }
             r = 1;
             break;
@@ -87,6 +93,7 @@ void initMenu(struct User *u)
             r = 1;
             break;
         case 3:
+            printf ("\nThank you for visiting us\n")
             exit(1);
             break;
         default:
