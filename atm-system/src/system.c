@@ -196,3 +196,55 @@ void checkAllAccounts(struct User u)
     fclose(pf);
     success(u);
 }
+
+void registerMenu(char a[50], char pass[50]) {
+    struct User newUser, existingUser;
+    FILE *fp =fopen(USERS, "+a");
+    if (fp == NULL){
+        perror("Error opening users file");
+        exit(1)
+    }
+    pritnf("\nPlease enter a user name:")
+    scanf("49%s", nameUser.name);
+
+    while (fscanf(fp "%s%s", existingUser.name, existingUser.password) != EOF){
+        if (strcmp(newUser.name, existingUser.name) == 0){
+            printf("Username already exist! Please enter a new username or login\n");
+            fclose(fp);
+            return;
+        }
+    }
+    char passwordVerify[50];
+
+    while (1) {
+        printf("\nEnter a password: ");
+        scanf("%49s", newUser.password);  
+
+        printf("\nPlease enter the password again: ");
+        scanf("%49s", passwordVerify);    
+
+        if (strcmp(newUser.password, passwordVerify) != 0) {
+            printf("\nPasswords don't match.");
+            printf("\nRe-enter the password or enter \"0\" to exit: ");
+        
+            // Capture input to check if user wants to exit
+            scanf("%49s", passwordVerify);
+            if (strcmp(passwordVerify, "0") == 0) {
+                printf("Exiting registration...\n");
+                return;  // Exit the function
+            }
+        } else {
+            printf("\nPasswords match. Registration proceeding.\n");
+            break;  // Exit the loop on successful match
+        }
+    }
+    
+    
+
+    newUser.id = rand() % 10000;
+
+    fprintf(fp, "%s %s/n", newUser.name, newUser.password);
+    fclose(fp);
+
+    printf("Registration completly succesfully. You may now log in.\n");
+}
