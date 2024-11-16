@@ -112,7 +112,6 @@ noAccount:
     printf("\nEnter the account number:");
     scanf("%d", &r.accountNbr);
     int option;
-    int option;
     int validInput = 0;
 
     while (getAccountFromFile(pf, userName, &cr)) {
@@ -247,4 +246,105 @@ void registerMenu(char a[50], char pass[50]) {
     fclose(fp);
 
     printf("Registration completly succesfully. You may now log in.\n");
+}
+
+void updateAcc(struct User u) {
+    struct Record r;
+    struct Record cr;
+    char userName[50];
+    FILE *pf = fopen(RECORDS, "r+");
+    if (pf == NULL) {
+        perror("Error opening file");
+        return;
+    }
+
+    system("clear");
+    printf("\nPlease enter the account number: ");
+    scanf("%d", &r.accountNbr);
+
+    int option;
+    int validInput = 0;
+    int found = 0;  // Track if account is found
+    while (getAccountFromFile(pf, userName, &cr)) {
+        if (cr.accountNbr == r.accountNbr && strcmp(userName, u.name) == 0) {
+            found = 1;  // Account exists, proceed to update
+
+            printf("\nEnter the new country or enter \"0\" to remain unchanged: ");
+            scanf("%s", r.country);
+            if (strcmp(r.country, "0") != 0) {
+                strcpy(cr.country, r.country);
+            }
+
+            printf("\nEnter the new phone number or enter \"0\" to remain unchanged: ");
+            scanf("%d", &r.phone);
+            if (r.phone != 0) {
+                cr.phone = r.phone;
+            }
+
+            printf("\nEnter the new account type or enter \"0\" to remain unchanged: ");
+            scanf("%s", r.accountType);
+            if (strcmp(r.accountType, "0") != 0) {
+                strcpy(cr.accountType, r.accountType);
+            }
+
+            // Update completed, prepare to rewrite the file
+            FILE *tempFile = fopen("temp.txt", "w");
+            if (tempFile == NULL) {
+                perror("Error creating temporary file");
+                fclose(pf);
+                return;
+            }
+
+            rewind(pf);  // Start from the beginning of the file
+            while (getAccountFromFile(pf, userName, &cr)) {
+                saveAccountToFile(tempFile, u, cr);
+            }
+
+            fclose(pf);
+            fclose(tempFile);
+
+            remove(RECORDS);
+            rename("temp.txt", RECORDS);
+
+            printf("\n✔ Account updated successfully!\n");
+            success(u);  // Display success message and options
+            return;
+        }
+    }
+
+    if (!found) {  // Account not found, handle this case
+        printf("✖ This Account does not exist for this user\n\n");
+        printf("If you intend to update the account, enter \"0\".\n");
+        printf("If you want to make a new account, enter \"1\".\n");
+        printf("Otherwise, enter \"2\" to exit the program.\n");
+
+        do {
+            printf("Enter your choice: ");
+            scanf("%d", &option);
+
+            switch (option) {
+                case 0:
+                    validInput = 1;  // Retry updating account
+                    updateAcc(u);
+                    return;
+
+                case 1:
+                    validInput = 1;  // Redirect to account creation
+                    createNewAcc(u);
+                    return;
+
+                case 2:
+                    validInput = 1;  // Exit the program
+                    printf("Thank you for visiting us!\n");
+                    fclose(pf);
+                    exit(0);
+
+                default:
+                    printf("Insert a valid operation!\n");
+                    break;
+            }
+        } while (!validInput);
+    }
+
+    fclose(pf);
 }
