@@ -158,9 +158,21 @@ noAccount:
     scanf("%d", &r.phone);
     printf("\nEnter amount to deposit: $");
     scanf("%lf", &r.amount);
-    printf("\nChoose the type of account:\n\t-> saving\n\t-> current\n\t-> fixed01(for 1 year)\n\t-> fixed02(for 2 years)\n\t-> fixed03(for 3 years)\n\n\tEnter your choice:");
-    scanf("%s", r.accountType);
-
+    
+    while (1){
+        printf("\nChoose the type of account:\n\t-> saving\n\t-> current\n\t-> fixed01(for 1 year)\n\t-> fixed02(for 2 years)\n\t-> fixed03(for 3 years)\n\n\tEnter your choice:");
+        scanf("%s", r.accountType);
+        if (strcmp(r.accountType, "saving")) == 0 ||
+            (strcmp(r.accountType, "current")) == 0 ||
+            (strcmp(r.accountType, "fixed01")) == 0 ||
+            (strcmp(r.accountType, "fixed02")) == 0 ||
+            (strcmp(r.accountType, "fixed03")) == 0 ||{
+                break;
+            }else{
+                printf("\n✖ Invalid account type! Please enter a valid account type.\n");
+            }
+    }
+        
     saveAccountToFile(pf, u, r);
 
     fclose(pf);
@@ -280,13 +292,6 @@ void updateAcc(struct User u) {
             if (r.phone != 0) {
                 cr.phone = r.phone;
             }
-
-            printf("\nEnter the new account type or enter \"0\" to remain unchanged: ");
-            scanf("%s", r.accountType);
-            if (strcmp(r.accountType, "0") != 0) {
-                strcpy(cr.accountType, r.accountType);
-            }
-
             // Update completed, prepare to rewrite the file
             FILE *tempFile = fopen("temp.txt", "w");
             if (tempFile == NULL) {
@@ -376,12 +381,29 @@ void checkAccount(struct User u){
             found = 1;
             printf("\n✔ Account Details:\n");
                 printf("Account Number: %d\n", cr.accountNbr);
-                printf("Country: %s\n", cr.country);
-                printf("Phone Number: %d\n", cr.phone);
                 printf("Account Type: %s\n", cr.accountType);
                 printf("Deposit Amount: $%.2f\n", cr.amount);
-                fclose(pf);
-                return;
+                printf("Deposit Date: %02d/%02d/%04d\n", cr.deposit.day, cr.deposit.month, cr.deposit.year);
+                
+                // Calculate interest based on account type
+                if (strcmp(cr.accountType, "savings") == 0) {
+                    double interest = cr.amount * 0.07 / 12;
+                    printf("You will get $%.2f as interest on day %d of every month.\n", interest, cr.deposit.day);
+                } else if (strcmp(cr.accountType, "fixed01") == 0) {
+                    double interest = cr.amount * 0.04 / 12;
+                    printf("You will get $%.2f as interest on day %d of every month.\n", interest, cr.deposit.day);
+                } else if (strcmp(cr.accountType, "fixed02") == 0) {
+                    double interest = cr.amount * 0.05 / 12;
+                    printf("You will get $%.2f as interest on day %d of every month.\n", interest, cr.deposit.day);
+                } else if (strcmp(cr.accountType, "fixed03") == 0) {
+                    double interest = cr.amount * 0.08 / 12;
+                    printf("You will get $%.2f as interest on day %d of every month.\n", interest, cr.deposit.day);
+                } else if (strcmp(cr.accountType, "current") == 0) {
+                    printf("You will not get interests because the account is of type current.\n");
+                } else {
+                    printf("Unknown account type.\n");
+                }
+
             }
         }
         if !(found){
