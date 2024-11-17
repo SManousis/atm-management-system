@@ -1,6 +1,20 @@
 #include "header.h"
 
 const char *RECORDS = "./data/records.txt";
+const char *validCountries[] = {
+    "United States", "Canada", "United Kingdom", "Germany", "France",
+    "Australia", "Japan", "India", "China", "Brazil",
+    "South Korea", "Mexico", "Russia", "Italy", "Spain",
+    "Netherlands", "Turkey", "Switzerland", "Saudi Arabia", "Sweden",
+    "Norway", "Argentina", "South Africa", "Poland", "Indonesia",
+    "Belgium", "Austria", "Denmark", "Singapore", "Malaysia",
+    "Thailand", "Philippines", "Vietnam", "Nigeria", "Egypt",
+    "Pakistan", "Bangladesh", "Ireland", "New Zealand", "Portugal",
+    "Greece", "Israel", "Finland", "Chile", "Colombia",
+    "Czech Republic", "Hungary", "Romania", "Slovakia", "Peru", "Greece"
+};
+
+const int countryCount = 51;
 
 int getAccountFromFile(FILE *ptr, char name[50], struct Record *r)
 {
@@ -151,9 +165,20 @@ noAccount:
          } while (!validInput);
         }
     }
-
-    printf("\nEnter the country:");
-    scanf("%s", r.country);
+    int valid = 0;
+    while (!valid){
+        printf("\nEnter the country:");
+        scanf("%s", r.country);
+        for (int i = 0; i < countryCount; i++){
+            if (strcmp(r.country, validCountries[i])) == 0{
+                valid = 1;
+                break;
+            }
+        }
+        if (!valid){
+            printf("\n✖ Invalid country! Please enter a valid country.\n")
+        }
+    }
     printf("\nEnter the phone number:");
     scanf("%d", &r.phone);
     printf("\nEnter amount to deposit: $");
@@ -274,25 +299,53 @@ void updateAcc(struct User u) {
     printf("\nPlease enter the account number: ");
     scanf("%d", &r.accountNbr);
 
+    int valid = 0;
     int option;
+    int option1;
     int validInput = 0;
     int found = 0;  // Track if account is found
     while (getAccountFromFile(pf, userName, &cr)) {
         if (cr.accountNbr == r.accountNbr && strcmp(userName, u.name) == 0) {
             found = 1;  // Account exists, proceed to update
+            
+            do{
+                printf("\nIf you want to update the country, please enter \"0\".\n");
+                printf("If you want to change the phone number, please enter \"1\".\n");
+                printf("Enter your choice: ");
+                scanf("%d", &option1);
+                switch (option1)
+                {
+                case 0:
+                    while (!valid){
+                        printf("\nEnter the country:");
+                        scanf("%s", r.country);
+                        for (int i = 0; i < countryCount; i++){
+                            if (strcmp(r.country, validCountries[i])) == 0{
+                                valid = 1;
+                                strcpy(cr.country, r.country);
+                                break;
+                            }
+                        }
+                        if (!valid){
+                            printf("\n✖ Invalid country! Please enter a valid country.\n")
+                        }
+                    }
+                    break;
 
-            printf("\nEnter the new country or enter \"0\" to remain unchanged: ");
-            scanf("%s", r.country);
-            if (strcmp(r.country, "0") != 0) {
-                strcpy(cr.country, r.country);
-            }
+                case 1:
+                    printf("\nEnter the new phone number or enter \"0\" to remain unchanged: ");
+                    scanf("%d", &r.phone);
+                    if (r.phone != 0) {
+                            cr.phone = r.phone;  // Update phone
+                        }
+                    break;
 
-            printf("\nEnter the new phone number or enter \"0\" to remain unchanged: ");
-            scanf("%d", &r.phone);
-            if (r.phone != 0) {
-                cr.phone = r.phone;
+                default:
+                    printf("Insert a valid operation!\n");
+                    break;
+                }
             }
-            // Update completed, prepare to rewrite the file
+             // Update completed, prepare to rewrite the file
             FILE *tempFile = fopen("temp.txt", "w");
             if (tempFile == NULL) {
                 perror("Error creating temporary file");
