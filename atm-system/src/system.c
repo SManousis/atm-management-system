@@ -348,3 +348,44 @@ void updateAcc(struct User u) {
 
     fclose(pf);
 }
+
+void checkAccount(struct User u){
+    struct Record r;
+    struct Record cr;
+    char userName[50];
+    FILE *pf = fopen(RECORDS, "r+");
+    if (pf == NULL) {
+        perror("Error opening file");
+        return;
+    }
+
+    system("clear");
+    int found = 0;
+    
+    while(1) {
+        printf("\nPlease enter the account number you need details of (or enter \"0\" to exit): ");
+        scanf("%d", &r.accountNbr);
+        if (r.accountNbr == 0){
+                printf("Thank you for visiting us!\n");
+                    fclose(pf);
+                    exit(0);
+            }
+        rewind(pf);
+        while (getAccountFromFile(pf, userName, &cr)){
+            if (cr.accountNbr == r.accountNbr && strcmp(userName, u.name) == 0) {
+            found = 1;
+            printf("\n✔ Account Details:\n");
+                printf("Account Number: %d\n", cr.accountNbr);
+                printf("Country: %s\n", cr.country);
+                printf("Phone Number: %d\n", cr.phone);
+                printf("Account Type: %s\n", cr.accountType);
+                printf("Deposit Amount: $%.2f\n", cr.amount);
+                fclose(pf);
+                return;
+            }
+        }
+        if !(found){
+            printf("\n✖ This Account does not exist for this user. Please try again.\n")
+        }
+    }
+}

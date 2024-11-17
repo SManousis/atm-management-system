@@ -22,13 +22,10 @@ void mainMenu(struct User u)
         createNewAcc(u);
         break;
     case 2:
-        // student TODO : add your **Update account information** function
-        // here
-        
+        updateAcc(u);
         break;
     case 3:
-        // student TODO : add your **Check the details of existing accounts** function
-        // here
+        checkAccount(u);
         break;
     case 4:
         checkAllAccounts(u);
