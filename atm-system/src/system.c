@@ -267,6 +267,7 @@ void registerMenu(char a[50], char pass[50]) {
             scanf("%49s", passwordVerify);
             if (strcmp(passwordVerify, "0") == 0) {
                 printf("Exiting registration...\n");
+                fclose(fp);
                 return;  // Exit the function
             }
         } else {
@@ -274,12 +275,12 @@ void registerMenu(char a[50], char pass[50]) {
             break;  // Exit the loop on successful match
         }
     }
-    
-    
 
     newUser.id = rand() % 10000;
 
-    fprintf(fp, "%s %s/n", newUser.name, newUser.password);
+    unsigned long hashedPassword = simpleHash(newUser.password);
+
+    fprintf(fp, "%s %lu/n", newUser.name, hashedPassword);
     fclose(fp);
 
     printf("Registration completly succesfully. You may now log in.\n");
@@ -481,7 +482,7 @@ void accountTransaction(struct User u) {
     double newTotal;
 
     while (1) {
-        printf("\nPlease enter the account number you need details of (or enter \"0\" to exit): ");
+        printf("\nPlease enter the account number from which you want to make a transaction  (or enter \"0\" to exit): ");
         scanf("%d", &r.accountNbr);
 
         if (r.accountNbr == 0) {
@@ -574,4 +575,60 @@ void accountTransaction(struct User u) {
             printf("\n✖ This account does not exist for this user. Please try again.\n");
         }
     }
+}
+
+unsigned long simpleHash(const char *str) {
+    unsigned long hash = 0;
+    while (*str) {
+        hash = (hash << 5) + (*str++);  // Left shift hash by 5 and add the current character
+    }
+    return hash;
+}
+
+void accountRemoval(struct User u) {
+    struct Record r;
+    struct Record cr;
+    char userName[50];
+    FILE *pf = fopen(RECORDS, "r+");
+    if (pf == NULL) {
+        perror("Error opening file");
+        return;
+    }
+
+    system("clear");
+    int found = 0;
+    printf("\nPlease enter the account number from which you want to delete  (or enter \"0\" to exit): ");
+        scanf("%d", &r.accountNbr);
+
+        if (r.accountNbr == 0) {
+            printf("Thank you for visiting us!\n");
+            fclose(pf);
+            return;
+        }
+
+        rewind(pf);  // Reset file pointer to start reading
+        while (getAccountFromFile(pf, userName, &cr)) {
+            if (cr.accountNbr == r.accountNbr && strcmp(userName, u.name) == 0) {
+                found = 1;
+                printf("\nYou want to delete the account number: %s. For safety reasons please enter again your password or enter \"0\" to exit:", r.accountNbr);
+                scanf("%d", r.password);
+                if (r.password == 0) {
+                    printf("Thank you for visiting us!\n");
+                    fclose(pf);
+                    return;
+                }
+                while (strcmp(r.password, getPassword(cr))) != 0{
+                    printf("\nWrong password. Please try again or enter \"0\" to exit:");
+                     scanf("%d", r.password);
+                    if (r.password == 0) {
+                        printf("Thank you for visiting us!\n");
+                        fclose(pf);
+                        return;
+                    }
+
+                }
+
+            }
+        }
+
 }

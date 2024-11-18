@@ -33,28 +33,29 @@ void loginMenu(char a[50], char pass[50])
     }
 };
 
-const char *getPassword(struct User u)
-{
+const char *getPassword(struct User u) {
     FILE *fp;
     struct User userChecker;
 
-    if ((fp = fopen(USERS, "r")) == NULL)
-    {
-        printf("Error! opening file");
+    if ((fp = fopen(USERS, "r")) == NULL) {
+        printf("Error! Opening file\n");
         exit(1);
     }
 
-    while (fscanf(fp, "%s %s", userChecker.name, userChecker.password) != EOF)
-    {
-        if (strcmp(userChecker.name, u.name) == 0)
-        {
+    // Hash the input password for comparison
+    unsigned long hashedInput = simpleHash(u.password);
+
+    while (fscanf(fp, "%s %lu", userChecker.name, &userChecker.password) != EOF) {
+        if (strcmp(userChecker.name, u.name) == 0) {
             fclose(fp);
-            // Dynamically allocate memory for the password
-            char *buff = strdup(userChecker.password);
-            return buff;
+            if (hashedInput == userChecker.password) {
+                return "Password Match";
+            } else {
+                return "Password Mismatch";
+            }
         }
     }
 
     fclose(fp);
-    return "no user found";
+    return "User Not Found";
 }
