@@ -597,41 +597,75 @@ void accountRemoval(struct User u) {
 
     system("clear");
     int found = 0;
-    printf("\nPlease enter the account number from which you want to delete  (or enter \"0\" to exit): ");
-        scanf("%d", &r.accountNbr);
 
-        if (r.accountNbr == 0) {
-            printf("Thank you for visiting us!\n");
-            fclose(pf);
-            return;
-        }
+    printf("\nPlease enter the account number you want to delete (or enter \"0\" to exit): ");
+    scanf("%d", &r.accountNbr);
 
-        rewind(pf);  // Reset file pointer to start reading
-        while (getAccountFromFile(pf, userName, &cr)) {
-            if (cr.accountNbr == r.accountNbr && strcmp(userName, u.name) == 0) {
-                found = 1;
-                printf("\nYou want to delete the account number: %s. For safety reasons please enter again your password or enter \"0\" to exit:", r.accountNbr);
-                scanf("%d", r.password);
-                if (r.password == 0) {
-                    printf("nThank you for visiting us!\n");
+    if (r.accountNbr == 0) {
+        printf("Thank you for visiting us!\n");
+        fclose(pf);
+        return;
+    }
+
+    rewind(pf);  // Reset file pointer to start reading
+    while (getAccountFromFile(pf, userName, &cr)) {
+        if (cr.accountNbr == r.accountNbr && strcmp(userName, u.name) == 0) {
+            found = 1;
+
+            printf("\nYou want to delete account number: %d.\n", r.accountNbr);
+            printf("For safety reasons, please enter your password (or enter \"0\" to exit):");
+            char password[50];
+            scanf("%s", password);
+
+            if (strcmp(password, "0") == 0) {
+                printf("\nThank you for visiting us!\n");
+                fclose(pf);
+                return;
+            }
+
+            while (strcmp(password, getPassword(u)) != 0) {
+                printf("\nWrong password. Please try again or enter \"0\" to exit: ");
+                scanf("%s", password);
+                if (strcmp(password, "0") == 0) {
+                    printf("\nThank you for visiting us!\n");
                     fclose(pf);
                     return;
                 }
-                while (strcmp(r.password, getPassword(cr))) != 0{
-                    printf("\nWrong password. Please try again or enter \"0\" to exit:");
-                     scanf("%d", r.password);
-                    if (r.password == 0) {
-                        printf("\nThank you for visiting us!\n");
-                        fclose(pf);
-                        return;
-                    }
-
-                }
-                if (r.amount > 0){
-                    printf("\nThere is a remaing amount of %s. The amount will be returned to the user after the account is closed")
-                }
-
             }
-        }
 
+            if (cr.amount > 0) {
+                printf("\nThere is a remaining amount of $%.2f. The amount will be returned to the user after the account is closed.\n", cr.amount);
+            }
+
+            // Skip writing this record to the new file
+            FILE *tempFile = fopen("temp.txt", "w");
+            if (tempFile == NULL) {
+                perror("Error creating temporary file");
+                fclose(pf);
+                return;
+            }
+
+            rewind(pf);  // Rewind original file pointer
+            while (getAccountFromFile(pf, userName, &cr)) {
+                if (cr.accountNbr != r.accountNbr) {  // Skip the record to be deleted
+                    saveAccountToFile(tempFile, u, cr);
+                }
+            }
+
+            fclose(pf);
+            fclose(tempFile);
+
+            remove(RECORDS);
+            rename("temp.txt", RECORDS);
+
+            printf("\n✔ Account deleted successfully!\n");
+            return;
+        }
+    }
+
+    if (!found) {
+        printf("\n✖ This account does not exist for this user. Please try again.\n");
+    }
+
+    fclose(pf);
 }
