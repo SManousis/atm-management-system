@@ -613,7 +613,7 @@ void accountRemoval(struct User u) {
                 printf("\nYou want to delete the account number: %s. For safety reasons please enter again your password or enter \"0\" to exit:", r.accountNbr);
                 scanf("%d", r.password);
                 if (r.password == 0) {
-                    printf("Thank you for visiting us!\n");
+                    printf("nThank you for visiting us!\n");
                     fclose(pf);
                     return;
                 }
@@ -621,11 +621,14 @@ void accountRemoval(struct User u) {
                     printf("\nWrong password. Please try again or enter \"0\" to exit:");
                      scanf("%d", r.password);
                     if (r.password == 0) {
-                        printf("Thank you for visiting us!\n");
+                        printf("\nThank you for visiting us!\n");
                         fclose(pf);
                         return;
                     }
 
+                }
+                if (r.amount > 0){
+                    printf("\nThere is a remaing amount of %s. The amount will be returned to the user after the account is closed")
                 }
 
             }
