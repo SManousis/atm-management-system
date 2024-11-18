@@ -37,8 +37,7 @@ void mainMenu(struct User u)
         accountRemoval(u);
         break;
     case 7:
-        // student TODO : add your **Transfer owner** function
-        // here
+        transferAccount(u);
         break;
     case 8:
         exit(1);
@@ -66,7 +65,7 @@ void initMenu(struct User *u)
         case 1:
             while (1) {
                 loginMenu(u->name, u->password);  // Capture username and password
-                char *storedPassword = getPassword(*u);
+                const char *storedPassword = getPassword(*u);
                 if (storedPassword == NULL) {
                         printf("User not found!\n");
                         continue;
@@ -90,7 +89,7 @@ void initMenu(struct User *u)
             r = 1;
             break;
         case 2:
-            registerMenu(u->name, u->password)
+            registerMenu(u->name, u->password);
             r = 1;
             break;
         case 3:

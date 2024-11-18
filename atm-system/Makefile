@@ -1,3 +1,7 @@
+# Compiler and flags
+CC = cc
+CFLAGS = -Wall -Wextra -g
+
 objects = src/main.o src/system.o src/auth.o
 
 atm : $(objects)

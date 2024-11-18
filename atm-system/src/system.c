@@ -669,3 +669,117 @@ void accountRemoval(struct User u) {
 
     fclose(pf);
 }
+
+void transferAccount(struct User u) {
+    struct Record r;
+    struct Record cr;
+    struct User newOwner;
+    char userName[50];
+    FILE *pf = fopen(RECORDS, "r+");
+    if (pf == NULL) {
+        perror("Error opening file");
+        return;
+    }
+
+    system("clear");
+    int found = 0;
+
+    printf("\nPlease enter the account number you want to transfer (or enter \"0\" to exit): ");
+    scanf("%d", &r.accountNbr);
+
+    if (r.accountNbr == 0) {
+        printf("Thank you for visiting us!\n");
+        fclose(pf);
+        return;
+    }
+
+    rewind(pf);
+    while (getAccountFromFile(pf, userName, &cr)) {
+        if (cr.accountNbr == r.accountNbr && strcmp(userName, u.name) == 0) {
+            found = 1;
+
+            printf("\nYou want to transfer account number: %d.\n", r.accountNbr);
+            printf("For safety reasons, please enter your password (or enter \"0\" to exit): ");
+            char password[50];
+            scanf("%s", password);
+
+            if (strcmp(password, "0") == 0) {
+                printf("\nThank you for visiting us!\n");
+                fclose(pf);
+                return;
+            }
+
+            while (strcmp(password, getPassword(u)) != 0) {
+                printf("\nWrong password. Please try again or enter \"0\" to exit: ");
+                scanf("%s", password);
+                if (strcmp(password, "0") == 0) {
+                    printf("\nThank you for visiting us!\n");
+                    fclose(pf);
+                    return;
+                }
+            }
+
+            // Ask for the new owner's username
+            printf("\nPlease enter the new owner's username: ");
+            scanf("%s", newOwner.name);
+
+            // Check if new owner exists
+            FILE *userFile = fopen(USERS, "r");
+            if (userFile == NULL) {
+                perror("Error opening users file");
+                fclose(pf);
+                return;
+            }
+
+            int userExists = 0;
+            struct User userChecker;
+            while (fscanf(userFile, "%s %s", userChecker.name, userChecker.password) != EOF) {
+                if (strcmp(newOwner.name, userChecker.name) == 0) {
+                    userExists = 1;
+                    newOwner.id = userChecker.id;  // Assuming id is stored and you want to use it
+                    break;
+                }
+            }
+
+            fclose(userFile);
+
+            if (!userExists) {
+                printf("\n✖ The specified user does not exist. Transfer aborted.\n");
+                fclose(pf);
+                return;
+            }
+
+            // Update the record to transfer ownership
+            strcpy(cr.name, newOwner.name);
+            cr.userId = newOwner.id;
+
+            // Save updated records to file
+            FILE *tempFile = fopen("temp.txt", "w");
+            if (tempFile == NULL) {
+                perror("Error creating temporary file");
+                fclose(pf);
+                return;
+            }
+
+            rewind(pf);
+            while (getAccountFromFile(pf, userName, &cr)) {
+                saveAccountToFile(tempFile, u, cr);
+            }
+
+            fclose(pf);
+            fclose(tempFile);
+
+            remove(RECORDS);
+            rename("temp.txt", RECORDS);
+
+            printf("\n✔ Account successfully transferred to %s!\n", newOwner.name);
+            return;
+        }
+    }
+
+    if (!found) {
+        printf("\n✖ This account does not exist for this user. Please try again.\n");
+    }
+
+    fclose(pf);
+}

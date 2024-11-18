@@ -41,6 +41,11 @@ const char *getPassword(struct User u);
 void createNewAcc(struct User u);
 void mainMenu(struct User u);
 void checkAllAccounts(struct User u);
+void updateAcc(struct User u);
+void checkAccount(struct User u);
+void accountTransaction(struct User u);
+void accountRemoval(struct User u);
+void transferAccount(struct User u);
 
 
 #endif
