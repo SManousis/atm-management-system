@@ -464,3 +464,114 @@ void checkAccount(struct User u){
         }
     }
 }
+
+void accountTransaction(struct User u) {
+    struct Record r;
+    struct Record cr;
+    char userName[50];
+    FILE *pf = fopen(RECORDS, "r+");
+    if (pf == NULL) {
+        perror("Error opening file");
+        return;
+    }
+
+    system("clear");
+    int found = 0;
+    int option;
+    double newTotal;
+
+    while (1) {
+        printf("\nPlease enter the account number you need details of (or enter \"0\" to exit): ");
+        scanf("%d", &r.accountNbr);
+
+        if (r.accountNbr == 0) {
+            printf("Thank you for visiting us!\n");
+            fclose(pf);
+            return;
+        }
+
+        rewind(pf);  // Reset file pointer to start reading
+        while (getAccountFromFile(pf, userName, &cr)) {
+            if (cr.accountNbr == r.accountNbr && strcmp(userName, u.name) == 0) {
+                found = 1;
+
+                // Check for fixed account types
+                if (strcmp(cr.accountType, "fixed01") == 0 ||
+                    strcmp(cr.accountType, "fixed02") == 0 ||
+                    strcmp(cr.accountType, "fixed03") == 0) {
+                    printf("\n✖ It is not possible to withdraw or deposit from this account type.\n");
+                    printf("Please try with a different account.\n");
+                    return;
+                }
+
+                printf("\nIf you want to make a deposit, please enter \"0\".\n");
+                printf("If you want to make a withdrawal, please enter \"1\".\n");
+                printf("Otherwise, enter \"2\" to exit.\n");
+
+                do {
+                    printf("Enter your choice: ");
+                    scanf("%d", &option);
+
+                    switch (option) {
+                        case 0:  // Deposit
+                            printf("Enter the amount you want to deposit: ");
+                            scanf("%lf", &r.amount);
+                            newTotal = cr.amount + r.amount;
+                            cr.amount = newTotal;
+                            printf("✔ Deposit successful! Your new total is $%.2f\n", newTotal);
+                            break;
+
+                        case 1:  // Withdrawal
+                            printf("Enter the amount you want to withdraw: ");
+                            scanf("%lf", &r.amount);
+                            while (r.amount > cr.amount) {
+                                printf("\n✖ Not enough funds.\n");
+                                printf("Your current total is $%.2f. Please enter a valid amount: ", cr.amount);
+                                scanf("%lf", &r.amount);
+                            }
+                            newTotal = cr.amount - r.amount;
+                            cr.amount = newTotal;
+                            printf("✔ Withdrawal successful! Your new total is $%.2f\n", newTotal);
+                            break;
+
+                        case 2:  // Exit
+                            printf("Thank you for visiting us!\n");
+                            fclose(pf);
+                            return;
+
+                        default:
+                            printf("✖ Invalid choice. Please try again.\n");
+                            break;
+                    }
+
+                } while (option != 2);
+
+                // Save updated account record to the file
+                FILE *tempFile = fopen("temp.txt", "w");
+                if (tempFile == NULL) {
+                    perror("Error creating temporary file");
+                    fclose(pf);
+                    return;
+                }
+
+                rewind(pf);  // Rewind original file pointer
+                while (getAccountFromFile(pf, userName, &cr)) {
+                    saveAccountToFile(tempFile, u, cr);
+                }
+
+                fclose(pf);
+                fclose(tempFile);
+
+                remove(RECORDS);
+                rename("temp.txt", RECORDS);
+
+                printf("\n✔ Account updated successfully!\n");
+                return;
+            }
+        }
+
+        if (!found) {
+            printf("\n✖ This account does not exist for this user. Please try again.\n");
+        }
+    }
+}
