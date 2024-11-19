@@ -8,7 +8,7 @@ const char *validCountries[] = {
     "Netherlands", "Turkey", "Switzerland", "Saudi Arabia", "Sweden",
     "Norway", "Argentina", "South Africa", "Poland", "Indonesia",
     "Belgium", "Austria", "Denmark", "Singapore", "Malaysia",
-    "Thailand", "Philippines", "Vietnam", "Nigeria", "Egypt",
+    "Thailand", "Philippines", "Vietnam", "Nigeria", "Egypt",3
     "Pakistan", "Bangladesh", "Ireland", "New Zealand", "Portugal",
     "Greece", "Israel", "Finland", "Chile", "Colombia",
     "Czech Republic", "Hungary", "Romania", "Slovakia", "Peru", "Greece"
@@ -258,7 +258,7 @@ void registerMenu(struct User *u) {
 
     printf("\nPlease enter a user name: ");
     clearInputBuffer();
-    readLine(newUser.name, sizeof(newUser.name));  // Use readLine instead of scanf
+    readLine(newUser.name, sizeof(newUser.name));
 
     int maxID = -1;
 
@@ -270,16 +270,34 @@ void registerMenu(struct User *u) {
         exit(1);
     }
 
-    // Check if username already exists and find max ID
-    while (fscanf(readFp, "%d %s %s", &existingUser.id, existingUser.name, existingUser.password) == 3) {
-        if (strcmp(newUser.name, existingUser.name) == 0) {
-            printf("Username already exists! Please enter a new username or login.\n");
-            fclose(fp);
-            fclose(readFp);
-            return;
-        }
-        if (existingUser.id > maxID) {
-            maxID = existingUser.id;
+    // Read existing users and check for duplicates
+    char line[256];
+    while (fgets(line, sizeof(line), readFp) != NULL) {
+        int numFields = sscanf(line, "%d %s %s", &existingUser.id, existingUser.name, existingUser.password);
+        if (numFields == 3) {
+            // Debugging output
+            // printf("Debug: Read user - ID: %d, Name: %s, Password: %s\n", existingUser.id, existingUser.name, existingUser.password);
+
+            // Check for duplicate username
+            if (strcmp(newUser.name, existingUser.name) == 0) {
+                printf("Username already exists! Please enter a new username or login.\n");
+                fclose(fp);
+                fclose(readFp);
+
+                printf("Press Enter to continue...");
+                getchar(); // Consume leftover newline
+                
+
+                initMenu(u);
+                return;
+            }
+
+            // Update maxID
+            if (existingUser.id > maxID) {
+                maxID = existingUser.id;
+            }
+        } else {
+            // Handle malformed lines if necessary
         }
     }
 
@@ -287,9 +305,10 @@ void registerMenu(struct User *u) {
 
     // Assign new user ID
     newUser.id = maxID + 1;
+    // printf("Debug: Assigned new user ID: %d\n", newUser.id);
 
+    // Proceed with password input and verification
     char passwordVerify[50];
-
     while (1) {
         printf("\nEnter a password: ");
         readLine(newUser.password, sizeof(newUser.password));
@@ -300,11 +319,15 @@ void registerMenu(struct User *u) {
         if (strcmp(newUser.password, passwordVerify) != 0) {
             printf("\nPasswords don't match.");
             printf("\nRe-enter the password or enter \"0\" to exit: ");
-
             readLine(passwordVerify, sizeof(passwordVerify));
 
             if (strcmp(passwordVerify, "0") == 0) {
                 printf("Exiting registration...\n");
+                fclose(fp);
+
+                printf("Press Enter to continue...");
+                getchar(); // Wait for Enter
+
                 initMenu(u);
                 return;
             }
@@ -314,14 +337,23 @@ void registerMenu(struct User *u) {
         }
     }
 
+    // Hash the password and save to file
     unsigned long hashedPassword = simpleHash(newUser.password);
+
+    // Debugging output before writing to file
+    // printf("Debug: Writing to file - ID: %d, Name: %s, Hashed Password: %lu\n", newUser.id, newUser.name, hashedPassword);
 
     fprintf(fp, "%d %s %lu\n", newUser.id, newUser.name, hashedPassword);
     fclose(fp);
 
     printf("Registration completed successfully. You may now log in.\n");
-    initMenu(u);  // Redirect back to main menu after registration
+    printf("Press Enter to continue...");
+    getchar(); // Wait for Enter
+
+    initMenu(u);
 }
+
+
 
 
 

@@ -13,7 +13,8 @@ void mainMenu(struct User u)
     printf("\n\t\t[5]- Make Transaction\n");
     printf("\n\t\t[6]- Remove existing account\n");
     printf("\n\t\t[7]- Transfer ownership\n");
-    printf("\n\t\t[8]- Exit\n");
+    printf("\n\t\t[8]- Exit to log in menu\n");
+    printf("\n\t\t[9]- Exit the program\n");
     scanf("%d", &option);
 
     switch (option)
@@ -40,6 +41,9 @@ void mainMenu(struct User u)
         transferAccount(u);
         break;
     case 8:
+        initMenu(&u);
+        break;
+    case 9:
         exit(1);
         break;
     default:
@@ -51,6 +55,7 @@ void initMenu(struct User *u)
 {
     int r = 0;
     int option;
+    
     system("clear");
     printf("\n\n\t\t======= ATM =======\n");
     printf("\n\t\t-->> Feel free to login / register :\n");
@@ -64,27 +69,63 @@ void initMenu(struct User *u)
         {
         case 1:
             while (1) {
-                loginMenu(u->name, u->password);  // Capture username and password
-                char *storedPassword = strdup(getPassword(*u));
-                if (storedPassword == NULL) {
-                        printf("User not found!\n");
-                        continue;
-                    }
-                if (strcmp(u->password, getPassword(*u)) == 0) {
-                    printf("\n\nPassword Match!\n");
-                    free(storedPassword);
-                    break;  // Exit the loop if the password is correct
-                } else {
-                    printf("\nWrong password or username!\n");
-                    printf("Re-enter the password or enter \"0\" to exit: ");
-                    scanf("%s", u->password);  // Capture new password
+                // Prompt for username
+                getUsername(u->name);
 
-                if (strcmp(u->password, "0") == 0) {
-                    free(storedPassword); 
-                    exit(1);  // Exit if the user wants to quit
+                // Check if user exists
+                char *storedPassword = getPassword(*u);
+
+                if (storedPassword == NULL) {
+                    printf("\t\t\t\t User not found! Please try again or register.\n");
+                    getchar();
+                    continue;  // Loop back to prompt for username again
+                }
+
+                // Prompt for password
+                getPasswordInput(u->password);
+                unsigned long hashedPassword = simpleHash(u->password);  // Hash entered password
+                unsigned long storedHash = strtoul(storedPassword, NULL, 10);  // Convert stored hash
+                    // Compare passwords
+                if (hashedPassword == storedHash) {
+                    printf("\n\n\t\t\t\t Password Match!\n");
+                    free(storedPassword);
+                    printf("\t\t\t\t You are now logged in. Press Enter to continue to the menu");
+                    getchar();
+                    getchar();  
+                    mainMenu(*u);  // Redirect to main menu
+                    
+                    return;  // Exit initMenu after successful login
+                } else {
+                    printf("\n\t\t\t\t Wrong password!\n");
+                    printf("\t\t\t\t Re-enter the password or enter \"0\" to exit: ");
+                    scanf("%49s", u->password);
+
+                    if (strcmp(u->password, "0") == 0) {
+                        free(storedPassword);
+                        break;  // Exit login loop to return to initMenu
+                    }
+
+                    unsigned long hashedPassword = simpleHash(u->password);  // Hash entered password
+                    unsigned long storedHash = strtoul(storedPassword, NULL, 10);  // Convert stored hash
+                        // Compare passwords
+                    if (hashedPassword == storedHash)  {
+                        printf("\n\n\t\t\t\t Password Match!\n");
+                        free(storedPassword);
+                        printf("\t\t\t\t You are now logged in. Press Enter to continue to the menu");
+                        getchar();
+                        getchar();
+                        mainMenu(*u);  // Redirect to main menu
+                        
+                        return;  // Exit initMenu after successful login
+                    } else {
+                        printf("\n\t\t\t\t Wrong password for the second time!\n");
+                        getchar();
+                        printf("\t\t\t\t Please log in again");
+                        free(storedPassword);
+                        getchar();
+                        continue;  // Loop back to prompt for username again
                     }
                 }
-                free(storedPassword);
             }
             r = 1;
             break;
