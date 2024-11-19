@@ -230,65 +230,100 @@ void checkAllAccounts(struct User u)
     fclose(pf);
     success(u);
 }
+
 void clearInputBuffer() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF) { }
 }
-void registerMenu(char a[50], char pass[50]) {
+
+char *readLine(char *buffer, size_t size) {
+    if (fgets(buffer, size, stdin) != NULL) {
+        // Remove trailing newline character, if present
+        size_t len = strlen(buffer);
+        if (len > 0 && buffer[len -1] == '\n') {
+            buffer[len -1] = '\0';
+        }
+        return buffer;
+    }
+    return NULL;
+}
+
+void registerMenu(struct User *u) {
     struct User newUser, existingUser;
-    FILE *fp =fopen(USERS, "a+");
-    if (fp == NULL){
+    FILE *fp = fopen(USERS, "a+");
+    if (fp == NULL) {
         perror("Error opening users file");
         exit(1);
     }
-    printf("\nPlease enter a user name:");
-    clearInputBuffer();
-    scanf("49%s", newUser.name);
 
-    while (fscanf(fp, "%s%s", existingUser.name, existingUser.password) != EOF){
-        if (strcmp(newUser.name, existingUser.name) == 0){
-            printf("Username already exist! Please enter a new username or login\n");
+    printf("\nPlease enter a user name: ");
+    clearInputBuffer();
+    readLine(newUser.name, sizeof(newUser.name));  // Use readLine instead of scanf
+
+    int maxID = -1;
+
+    // Open file to read existing users
+    FILE *readFp = fopen(USERS, "r");
+    if (readFp == NULL) {
+        perror("Error opening users file for reading");
+        fclose(fp);
+        exit(1);
+    }
+
+    // Check if username already exists and find max ID
+    while (fscanf(readFp, "%d %s %s", &existingUser.id, existingUser.name, existingUser.password) == 3) {
+        if (strcmp(newUser.name, existingUser.name) == 0) {
+            printf("Username already exists! Please enter a new username or login.\n");
             fclose(fp);
+            fclose(readFp);
             return;
         }
+        if (existingUser.id > maxID) {
+            maxID = existingUser.id;
+        }
     }
+
+    fclose(readFp);
+
+    // Assign new user ID
+    newUser.id = maxID + 1;
+
     char passwordVerify[50];
 
     while (1) {
         printf("\nEnter a password: ");
-        clearInputBuffer();
-        scanf("%49s", newUser.password);  
+        readLine(newUser.password, sizeof(newUser.password));
 
         printf("\nPlease enter the password again: ");
-        clearInputBuffer();
-        scanf("%49s", passwordVerify);    
+        readLine(passwordVerify, sizeof(passwordVerify));
 
         if (strcmp(newUser.password, passwordVerify) != 0) {
             printf("\nPasswords don't match.");
             printf("\nRe-enter the password or enter \"0\" to exit: ");
-        
-            // Capture input to check if user wants to exit
-            scanf("%49s", passwordVerify);
+
+            readLine(passwordVerify, sizeof(passwordVerify));
+
             if (strcmp(passwordVerify, "0") == 0) {
                 printf("Exiting registration...\n");
-                fclose(fp);
-                return;  // Exit the function
+                initMenu(u);
+                return;
             }
         } else {
             printf("\nPasswords match. Registration proceeding.\n");
-            break;  // Exit the loop on successful match
+            break;
         }
     }
 
-    newUser.id = rand() % 10000;
-
     unsigned long hashedPassword = simpleHash(newUser.password);
 
-    fprintf(fp, "%s %lu/n", newUser.name, hashedPassword);
+    fprintf(fp, "%d %s %lu\n", newUser.id, newUser.name, hashedPassword);
     fclose(fp);
 
-    printf("Registration completly succesfully. You may now log in.\n");
+    printf("Registration completed successfully. You may now log in.\n");
+    initMenu(u);  // Redirect back to main menu after registration
 }
+
+
 
 void updateAcc(struct User u) {
     struct Record r;
@@ -787,3 +822,5 @@ void transferAccount(struct User u) {
 
     fclose(pf);
 }
+
+

@@ -89,7 +89,7 @@ void initMenu(struct User *u)
             r = 1;
             break;
         case 2:
-            registerMenu(u->name, u->password);
+            registerMenu(u);
             r = 1;
             break;
         case 3:
