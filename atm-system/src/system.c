@@ -15,7 +15,7 @@ const char *validCountries[] = {
 };
 
 const int countryCount = 51;
-
+const char *USERS = "./data/users.txt"; 
 int getAccountFromFile(FILE *ptr, char name[50], struct Record *r)
 {
     return fscanf(ptr, "%d %d %s %d %d/%d/%d %s %d %lf %s",
@@ -35,17 +35,15 @@ int getAccountFromFile(FILE *ptr, char name[50], struct Record *r)
 void saveAccountToFile(FILE *ptr, struct User u, struct Record r)
 {
     fprintf(ptr, "%d %d %s %d %d/%d/%d %s %d %.2lf %s\n\n",
-            r->id,
-	    u->id
-	    u->name,
-            r.accountNbr,
-            r.deposit.month,
-            r.deposit.day,
-            r.deposit.year,
-            r.country,
-            r.phone,
-            r.amount,
-            r.accountType);
+        r.id,        // %d for Record ID
+        u.id,        // %d for User ID
+        u.name,      // %s for User Name
+        r.accountNbr,// %d for Account Number
+        r.deposit.month, r.deposit.day, r.deposit.year,  // %d/%d/%d for Date
+        r.country,   // %s for Country
+        r.phone,     // %d for Phone Number
+        r.amount,    // %.2lf for Amount
+        r.accountType);
 }
 
 void stayOrReturn(int notGood, void f(struct User u), struct User u)
@@ -170,13 +168,13 @@ noAccount:
         printf("\nEnter the country:");
         scanf("%s", r.country);
         for (int i = 0; i < countryCount; i++){
-            if (strcmp(r.country, validCountries[i])) == 0{
+            if (strcmp(r.country, validCountries[i]) == 0){
                 valid = 1;
                 break;
             }
         }
         if (!valid){
-            printf("\n✖ Invalid country! Please enter a valid country.\n")
+            printf("\n✖ Invalid country! Please enter a valid country.\n");
         }
     }
     printf("\nEnter the phone number:");
@@ -187,11 +185,11 @@ noAccount:
     while (1){
         printf("\nChoose the type of account:\n\t-> saving\n\t-> current\n\t-> fixed01(for 1 year)\n\t-> fixed02(for 2 years)\n\t-> fixed03(for 3 years)\n\n\tEnter your choice:");
         scanf("%s", r.accountType);
-        if (strcmp(r.accountType, "saving")) == 0 ||
-            (strcmp(r.accountType, "current")) == 0 ||
-            (strcmp(r.accountType, "fixed01")) == 0 ||
-            (strcmp(r.accountType, "fixed02")) == 0 ||
-            (strcmp(r.accountType, "fixed03")) == 0 ||{
+        if (strcmp(r.accountType, "saving") == 0 ||
+            strcmp(r.accountType, "current") == 0 ||
+            strcmp(r.accountType, "fixed01") == 0 ||
+            strcmp(r.accountType, "fixed02") == 0 ||
+            strcmp(r.accountType, "fixed03") == 0){
                 break;
             }else{
                 printf("\n✖ Invalid account type! Please enter a valid account type.\n");
@@ -232,18 +230,22 @@ void checkAllAccounts(struct User u)
     fclose(pf);
     success(u);
 }
-
+void clearInputBuffer() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) { }
+}
 void registerMenu(char a[50], char pass[50]) {
     struct User newUser, existingUser;
-    FILE *fp =fopen(USERS, "+a");
+    FILE *fp =fopen(USERS, "a+");
     if (fp == NULL){
         perror("Error opening users file");
-        exit(1)
+        exit(1);
     }
-    pritnf("\nPlease enter a user name:")
-    scanf("49%s", nameUser.name);
+    printf("\nPlease enter a user name:");
+    clearInputBuffer();
+    scanf("49%s", newUser.name);
 
-    while (fscanf(fp "%s%s", existingUser.name, existingUser.password) != EOF){
+    while (fscanf(fp, "%s%s", existingUser.name, existingUser.password) != EOF){
         if (strcmp(newUser.name, existingUser.name) == 0){
             printf("Username already exist! Please enter a new username or login\n");
             fclose(fp);
@@ -254,9 +256,11 @@ void registerMenu(char a[50], char pass[50]) {
 
     while (1) {
         printf("\nEnter a password: ");
+        clearInputBuffer();
         scanf("%49s", newUser.password);  
 
         printf("\nPlease enter the password again: ");
+        clearInputBuffer();
         scanf("%49s", passwordVerify);    
 
         if (strcmp(newUser.password, passwordVerify) != 0) {
@@ -321,14 +325,14 @@ void updateAcc(struct User u) {
                         printf("\nEnter the country:");
                         scanf("%s", r.country);
                         for (int i = 0; i < countryCount; i++){
-                            if (strcmp(r.country, validCountries[i])) == 0{
+                            if (strcmp(r.country, validCountries[i]) == 0){
                                 valid = 1;
                                 strcpy(cr.country, r.country);
                                 break;
                             }
                         }
                         if (!valid){
-                            printf("\n✖ Invalid country! Please enter a valid country.\n")
+                            printf("\n✖ Invalid country! Please enter a valid country.\n");
                         }
                     }
                     break;
@@ -345,7 +349,7 @@ void updateAcc(struct User u) {
                     printf("Insert a valid operation!\n");
                     break;
                 }
-            }
+            }while (option1 != 2);
              // Update completed, prepare to rewrite the file
             FILE *tempFile = fopen("temp.txt", "w");
             if (tempFile == NULL) {
@@ -460,8 +464,8 @@ void checkAccount(struct User u){
 
             }
         }
-        if !(found){
-            printf("\n✖ This Account does not exist for this user. Please try again.\n")
+        if (!found){
+            printf("\n✖ This Account does not exist for this user. Please try again.\n");
         }
     }
 }

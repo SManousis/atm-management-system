@@ -35,7 +35,8 @@ struct User
 // authentication functions
 void loginMenu(char a[50], char pass[50]);
 void registerMenu(char a[50], char pass[50]);
-const char *getPassword(struct User u);
+char *getPassword(struct User u);
+unsigned long simpleHash(const char *str);
 
 // system function
 void createNewAcc(struct User u);
@@ -46,6 +47,7 @@ void checkAccount(struct User u);
 void accountTransaction(struct User u);
 void accountRemoval(struct User u);
 void transferAccount(struct User u);
-
+void initMenu(struct User *u);
+extern const char *USERS; 
 
 #endif

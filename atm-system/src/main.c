@@ -65,7 +65,7 @@ void initMenu(struct User *u)
         case 1:
             while (1) {
                 loginMenu(u->name, u->password);  // Capture username and password
-                const char *storedPassword = getPassword(*u);
+                char *storedPassword = strdup(getPassword(*u));
                 if (storedPassword == NULL) {
                         printf("User not found!\n");
                         continue;
@@ -93,7 +93,7 @@ void initMenu(struct User *u)
             r = 1;
             break;
         case 3:
-            printf ("\nThank you for visiting us\n")
+            printf ("\nThank you for visiting us\n");
             exit(1);
             break;
         default:

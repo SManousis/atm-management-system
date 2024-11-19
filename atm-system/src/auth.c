@@ -1,7 +1,7 @@
 #include <termios.h>
 #include "header.h"
 
-char *USERS = "./data/users.txt";
+
 
 void loginMenu(char a[50], char pass[50])
 {
@@ -33,7 +33,7 @@ void loginMenu(char a[50], char pass[50])
     }
 };
 
-const char *getPassword(struct User u) {
+    char *getPassword(struct User u) {
     FILE *fp;
     struct User userChecker;
 
@@ -45,10 +45,11 @@ const char *getPassword(struct User u) {
     // Hash the input password for comparison
     unsigned long hashedInput = simpleHash(u.password);
 
-    while (fscanf(fp, "%s %lu", userChecker.name, &userChecker.password) != EOF) {
+    while (fscanf(fp, "%s %s", userChecker.name, userChecker.password) != EOF) {
         if (strcmp(userChecker.name, u.name) == 0) {
             fclose(fp);
-            if (hashedInput == userChecker.password) {
+            unsigned long hashedStoredPassword = simpleHash(userChecker.password);
+            if (hashedInput == hashedStoredPassword){
                 return "Password Match";
             } else {
                 return "Password Mismatch";
