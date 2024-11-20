@@ -32,7 +32,28 @@ void getPasswordInput(char pass[50]) {
     }
 }
 
+void getPasswordInputDeletion(char pass[50]) {
+    struct termios oflags, nflags;
 
+    // Disabling echo
+    tcgetattr(fileno(stdin), &oflags);
+    nflags = oflags;
+    nflags.c_lflag &= ~ECHO;
+    nflags.c_lflag |= ECHONL;
+
+    if (tcsetattr(fileno(stdin), TCSANOW, &nflags) != 0) {
+        perror("tcsetattr");
+        exit(1);
+    }
+    printf(" ");
+    scanf("%49s", pass);
+
+    // Restore terminal
+    if (tcsetattr(fileno(stdin), TCSANOW, &oflags) != 0) {
+        perror("tcsetattr");
+        exit(1);
+    }
+}
 
 char *getPassword(struct User u) {
     FILE *fp;
