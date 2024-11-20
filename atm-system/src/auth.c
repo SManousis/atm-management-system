@@ -5,7 +5,7 @@
 
 void getUsername(char a[50]) {
     system("clear");
-    printf("\n\n\n\t\t\t\t   Bank Management System\n\t\t\t\t\t User Login: ");
+    printf("\n\n\n\t\t\t\t Bank Management System\n\t\t\t\t User Login: ");
     scanf("%49s", a);
 }
 
@@ -22,7 +22,7 @@ void getPasswordInput(char pass[50]) {
         perror("tcsetattr");
         exit(1);
     }
-    printf("Enter the password to login: ");
+    printf("\t\t\t\t Enter the password to login: ");
     scanf("%49s", pass);
 
     // Restore terminal
