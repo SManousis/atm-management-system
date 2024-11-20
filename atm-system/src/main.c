@@ -76,8 +76,7 @@ void initMenu(struct User *u)
                 char *storedPassword = getPassword(*u);
 
                 if (storedPassword == NULL) {
-                    printf("\t\t\t\t User not found! Please try again or register.\n");
-                    getchar();
+                    printf("User not found! Please try again or register.\n");
                     continue;  // Loop back to prompt for username again
                 }
 
@@ -85,44 +84,34 @@ void initMenu(struct User *u)
                 getPasswordInput(u->password);
                 unsigned long hashedPassword = simpleHash(u->password);  // Hash entered password
                 unsigned long storedHash = strtoul(storedPassword, NULL, 10);  // Convert stored hash
-                    // Compare passwords
+                        // Compare passwords
                 if (hashedPassword == storedHash) {
-                    printf("\n\n\t\t\t\t Password Match!\n");
+                    printf("\n\nPassword Match!\n");
                     free(storedPassword);
-                    printf("\t\t\t\t You are now logged in. Press Enter to continue to the menu");
-                    getchar();
-                    getchar();  
                     mainMenu(*u);  // Redirect to main menu
-                    
                     return;  // Exit initMenu after successful login
                 } else {
-                    printf("\n\t\t\t\t Wrong password!\n");
-                    printf("\t\t\t\t Re-enter the password or enter \"0\" to exit: ");
-                    scanf("%49s", u->password);
+                    printf("\nWrong password!\n");
+                    printf("Re-enter the password or enter \"0\" to exit: ");
+                    getPasswordInput(u->password);
 
                     if (strcmp(u->password, "0") == 0) {
                         free(storedPassword);
                         break;  // Exit login loop to return to initMenu
                     }
 
+                    
                     unsigned long hashedPassword = simpleHash(u->password);  // Hash entered password
                     unsigned long storedHash = strtoul(storedPassword, NULL, 10);  // Convert stored hash
                         // Compare passwords
                     if (hashedPassword == storedHash)  {
-                        printf("\n\n\t\t\t\t Password Match!\n");
+                        printf("\n\nPassword Match!\n");
                         free(storedPassword);
-                        printf("\t\t\t\t You are now logged in. Press Enter to continue to the menu");
-                        getchar();
-                        getchar();
                         mainMenu(*u);  // Redirect to main menu
-                        
                         return;  // Exit initMenu after successful login
                     } else {
-                        printf("\n\t\t\t\t Wrong password for the second time!\n");
-                        getchar();
-                        printf("\t\t\t\t Please log in again");
+                        printf("\nWrong password!\n");
                         free(storedPassword);
-                        getchar();
                         continue;  // Loop back to prompt for username again
                     }
                 }

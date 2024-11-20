@@ -8,7 +8,7 @@ const char *validCountries[] = {
     "Netherlands", "Turkey", "Switzerland", "Saudi Arabia", "Sweden",
     "Norway", "Argentina", "South Africa", "Poland", "Indonesia",
     "Belgium", "Austria", "Denmark", "Singapore", "Malaysia",
-    "Thailand", "Philippines", "Vietnam", "Nigeria", "Egypt",3
+    "Thailand", "Philippines", "Vietnam", "Nigeria", "Egypt",
     "Pakistan", "Bangladesh", "Ireland", "New Zealand", "Portugal",
     "Greece", "Israel", "Finland", "Chile", "Colombia",
     "Czech Republic", "Hungary", "Romania", "Slovakia", "Peru", "Greece"

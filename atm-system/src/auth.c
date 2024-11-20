@@ -5,7 +5,7 @@
 
 void getUsername(char a[50]) {
     system("clear");
-    printf("\n\n\n\t\t\t\t Bank Management System\n\t\t\t\t User Login: ");
+    printf("\n\n\n\t\t\t\t   Bank Management System\n\t\t\t\t\t User Login: ");
     scanf("%49s", a);
 }
 
@@ -22,7 +22,7 @@ void getPasswordInput(char pass[50]) {
         perror("tcsetattr");
         exit(1);
     }
-    printf("\t\t\t\t Enter the password to login: ");
+    printf("Enter the password to login: ");
     scanf("%49s", pass);
 
     // Restore terminal
@@ -45,7 +45,7 @@ char *getPassword(struct User u) {
     }
 
     while (fscanf(fp, "%d %49s %49s", &id, userChecker.name, userChecker.password) != EOF) {
-        // Debugging output
+        // Commented out debug output
         // printf("Read from file - ID: %d, Username: '%s', Password: '%s'\n", id, userChecker.name, userChecker.password);
 
         if (strcmp(userChecker.name, u.name) == 0) {
