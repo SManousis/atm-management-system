@@ -1005,13 +1005,13 @@ void transferAccount(struct User u) {
     system("clear");
     int found = 0;
 
-    printf("\nPlease enter the account number you want to transfer (or enter \"0\" to exit): ");
+    printf("\nPlease enter the account number you want to transfer or enter \"0\" to exit to the menu: ");
     scanf("%d", &r.accountNbr);
 
     if (r.accountNbr == 0) {
-        printf("Thank you for visiting us!\n");
+        printf("\nYou are now returning to the menu.\n");    
         fclose(pf);
-        return;
+        mainMenu(u);
     }
 
     rewind(pf);
@@ -1020,61 +1020,67 @@ void transferAccount(struct User u) {
             found = 1;
 
             printf("\nYou want to transfer account number: %d.\n", r.accountNbr);
-            printf("For safety reasons, please enter your password (or enter \"0\" to exit): ");
+            printf("For safety reasons, please enter your password or enter \"0\" to exit to the menu: ");
             getPasswordInputDeletion(u.password);
             unsigned long hashedPassword = simpleHash(u.password);  // Hash entered password
             char *storedPassword = getPassword(u);  // Get stored password as a string
             unsigned long storedHash = strtoul(storedPassword, NULL, 10);
 
             if (strcmp(u.password, "0") == 0) {
-                printf("\nThank you for visiting us!\n");
+                printf("\nYou are now returning to the menu.\n");
+                getchar();
                 fclose(pf);
                 free(storedPassword);
-                return;
+                mainMenu(u);
             }
 
             while (hashedPassword != storedHash) {
-                printf("\nWrong password. Please try again or enter \"0\" to exit: ");
+                printf("\nWrong password. Please try again or enter \"0\" to exit to the menu: ");
                 getPasswordInputDeletion(u.password);  // Capture new password
                 hashedPassword = simpleHash(u.password);
                 if (strcmp(u.password, "0") == 0) {
-                    printf("\nThank you for visiting us!\n");
+                    printf("\nYou are now returning to the menu.\n");
                     fclose(pf);
                     free(storedPassword);
-                    return;
+                    mainMenu(u);
                 }
             }
 
             free(storedPassword);
-
-            // Ask for the new owner's username
-            printf("\nPlease enter the new owner's username: ");
-            scanf("%49s", newOwner.name);
-
-            // Check if new owner exists
-            FILE *userFile = fopen(USERS, "r");
-            if (userFile == NULL) {
-                perror("Error opening users file");
-                fclose(pf);
-                return;
-            }
-
-            int userExists = 0;
-            struct User userChecker;
-            while (fscanf(userFile, "%d %s %s", &userChecker.id, userChecker.name, userChecker.password) != EOF) {
-                if (strcmp(newOwner.name, userChecker.name) == 0) {
-                    userExists = 1;
-                    newOwner.id = userChecker.id;
-                    break;
+            while(1){
+                // Ask for the new owner's username
+                printf("\nPlease enter the new owner's username or enter \"0\" to exit to the menu: ");
+                scanf("%49s", newOwner.name);
+                if (strcmp(newOwner.name, "0") == 0) {
+                    printf("\nYou are now returning to the menu.\n");
+                    fclose(pf);
+                    mainMenu(u);
                 }
-            }
+                // Check if new owner exists
+                FILE *userFile = fopen(USERS, "r");
+                if (userFile == NULL) {
+                    perror("Error opening users file");
+                    fclose(pf);
+                    return;
+                }
 
-            fclose(userFile);
+                int userExists = 0;
+                struct User userChecker;
+                while (fscanf(userFile, "%d %s %s", &userChecker.id, userChecker.name, userChecker.password) != EOF) {
+                    if (strcmp(newOwner.name, userChecker.name) == 0) {
+                        userExists = 1;
+                        newOwner.id = userChecker.id;
+                        break;
+                    }
+                }
 
-            if (!userExists) {
-                printf("\n✖ The specified user does not exist. Transfer aborted.\n");
-                fclose(pf);
-                return;
+                fclose(userFile);
+
+                if (!userExists) {
+                    printf("\n✖ The specified user does not exist.\n");
+                    //fclose(pf);
+                    //return;
+                }
             }
 
             // Update the record to transfer ownership
