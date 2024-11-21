@@ -209,8 +209,8 @@ double getValidDouble(const char *prompt) {
 void getValidDate(int *day, int *month, int *year) {
     char dateInput[11];
     while (1) {
-        printf("Enter today's date(mm/dd/yyyy):");
         clearInputBuffer();
+        printf("Enter today's date(mm/dd/yyyy):");
         fgets(dateInput, sizeof(dateInput), stdin);
         dateInput[strcspn(dateInput, "\n")] = 0;  // Remove trailing newline
 
@@ -221,8 +221,9 @@ void getValidDate(int *day, int *month, int *year) {
             } else {
                 printf("Invalid date. Please enter a valid date.\n");
             }
+            
         } else {
-            printf("Invalid format. Please enter in mm/dd/yyyy format.\n");
+            printf("\nInvalid format. Press enter to continue");
         }
     }
 }
@@ -593,7 +594,7 @@ void updateAcc(struct User u) {
             do {
                 printf("\nIf you want to update the country, please enter \"0\".\n");
                 printf("If you want to change the phone number, please enter \"1\".\n");
-                printf("If you want to return to the main menu please enter \"2\".\n");
+                printf("If you want to apply the changes please enter \"2\".\n");
                 printf("Enter your choice: ");
                 scanf("%d", &option1);
                 switch (option1) {
