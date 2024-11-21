@@ -116,6 +116,39 @@ void stayOrReturn(int notGood, void f(struct User u), struct User u)
     }
 }
 
+// Function to read a valid integer from the user
+int getValidInteger(const char *prompt) {
+    char input[100];
+    char *endptr;
+    int value;
+
+    while (1) {
+        printf("%s", prompt);
+        if (fgets(input, sizeof(input), stdin) != NULL) {
+            // Remove trailing newline character
+            input[strcspn(input, "\n")] = '\0';
+
+            // Check if input is empty
+            if (strlen(input) == 0) {
+                printf("✖ Invalid input! Input cannot be empty.\n");
+                continue;
+            }
+
+            // Convert string to integer
+            value = strtol(input, &endptr, 10);
+
+            // Check for conversion errors
+            if (*endptr != '\0') {
+                printf("✖ Invalid input! Please enter a valid integer.\n");
+            } else {
+                return value;
+            }
+        } else {
+            printf("✖ Error reading input! Please try again.\n");
+        }
+    }
+}
+
 void success(struct User u)
 {
     int option;
@@ -139,6 +172,40 @@ invalid:
     }
 }
 
+// Function to read a valid double from the user
+double getValidDouble(const char *prompt) {
+    char input[100];
+    char *endptr;
+    double value;
+
+    while (1) {
+        printf("%s", prompt);
+        if (fgets(input, sizeof(input), stdin) != NULL) {
+            // Remove trailing newline character
+            input[strcspn(input, "\n")] = '\0';
+
+            // Check if input is empty
+            if (strlen(input) == 0) {
+                printf("✖ Invalid input! Input cannot be empty.\n");
+                continue;
+            }
+
+            // Convert string to double
+            value = strtod(input, &endptr);
+
+            // Check for conversion errors
+            if (*endptr != '\0') {
+                printf("✖ Invalid input! Please enter a valid number.\n");
+            } else {
+                return value;
+            }
+        } else {
+            printf("✖ Error reading input! Please try again.\n");
+        }
+    }
+}
+
+
 void getValidDate(int *day, int *month, int *year) {
     char dateInput[11];
     while (1) {
@@ -160,8 +227,7 @@ void getValidDate(int *day, int *month, int *year) {
     }
 }
 
-void createNewAcc(struct User u)
-{
+void createNewAcc(struct User u) {
     struct Record r;
     struct Record cr;
     char userName[50];
@@ -186,6 +252,9 @@ void createNewAcc(struct User u)
             maxID = cr.id;
         }
     }
+    fclose(readFp);  // Close readFp after use
+
+    // Open users file to get userId
     FILE *userFile = fopen(USERS, "r");
     if (userFile == NULL) {
         perror("Error opening users file");
@@ -198,6 +267,7 @@ void createNewAcc(struct User u)
     while (fscanf(userFile, "%d %s %s", &tempUser.id, tempUser.name, tempUser.password) == 3) {
         if (strcmp(tempUser.name, u.name) == 0) {
             r.userId = tempUser.id; 
+            u.id = tempUser.id;      // Ensure u.id is set
             userIdFound = 1;
             break;
         }
@@ -211,31 +281,24 @@ void createNewAcc(struct User u)
         return;
     }
 
-
-
     system("clear");
     printf("\t\t\t===== New record =====\n");
     r.id = maxID + 1;
-    //printf("\nEnter today's date(mm/dd/yyyy):");
-    //scanf("%d/%d/%d", &r.deposit.month, &r.deposit.day, &r.deposit.year);
+
+    // Get valid date
     int day, month, year;
     getValidDate(&day, &month, &year);
 
-    // After getting the valid date, assign it to your struct
+    // Assign date to struct
     r.deposit.day = day;
     r.deposit.month = month;
     r.deposit.year = year;
     clearInputBuffer();
-    printf("\nEnter a 6-digit account number:");
-    if (scanf("%6d", &r.accountNbr) != 1) {  // Read account number and validate input
-        printf("Invalid input! Please enter a 6-digit account number.\n");
-        clearInputBuffer();
-        fclose(pf);
-        return;
-    }
-    clearInputBuffer();
-    printf("\nThank you. The account number is valid.");
+    // Get valid account number
+    r.accountNbr = getValidInteger("\nEnter an account number: ");
 
+    // Check for duplicate account number
+    rewind(pf);  // Reset file pointer to start reading
     int option;
     int validInput = 0;
 
@@ -247,69 +310,69 @@ void createNewAcc(struct User u)
             printf("Otherwise, enter \"2\" to exit the program.\n");
 
             do {
-                printf("Enter your choice: ");
-                scanf("%d", &option);
+                option = getValidInteger("Enter your choice: ");
 
                 switch (option) {
                     case 0:
                         validInput = 1;
-                        // Break out of the inner loop and restart account creation.
-                        break;
-
+                        // Restart account creation
+                        fclose(pf);
+                        createNewAcc(u);
+                        return;
                     case 1:
                         validInput = 1;
                         printf("Redirecting to the login menu...\n");
-                        // Call the login menu or sign-in functionality here
+                        fclose(pf);
                         initMenu(&u);  // Assuming initMenu() handles login
                         return;        // Exit the account creation if they go to login
-
                     case 2:
                         validInput = 1;
                         printf("Thank you for visiting us!\n");
                         fclose(pf);
                         exit(0);
-
                     default:
                         printf("Insert a valid operation!\n");
                         break;
                 }
-         } while (!validInput);
+            } while (!validInput);
         }
     }
+
+    // Get valid country
     int valid = 0;
-    while (!valid){
-        printf("\nEnter the country:");
-        scanf("%s", r.country);
-        for (int i = 0; i < countryCount; i++){
-            if (strcmp(r.country, validCountries[i]) == 0){
+    while (!valid) {
+        printf("\nEnter the country: ");
+        fgets(r.country, sizeof(r.country), stdin);
+        r.country[strcspn(r.country, "\n")] = '\0';  // Remove newline
+
+        for (int i = 0; i < countryCount; i++) {
+            if (strcmp(r.country, validCountries[i]) == 0) {
                 valid = 1;
                 break;
             }
         }
-        if (!valid){
+        if (!valid) {
             printf("\n✖ Invalid country! Please enter a valid country.\n");
         }
     }
-    printf("\nEnter the phone number:");
-    scanf("%d", &r.phone);
-    printf("\nEnter amount to deposit: $");
-    scanf("%lf", &r.amount);
+
+    // Get valid phone number
+    r.phone = getValidInteger("\nEnter the phone number: ");
+
+    // Get valid amount to deposit
+    r.amount = getValidDouble("\nEnter amount to deposit: $");
+
+    // Get valid account type
     int option2;
     while (1) {
-        int option2;  // Declare option as an integer
         printf("\nChoose the type of account:\n");
         printf("\t-> For saving account choose \"0\"\n");
         printf("\t-> For current account choose \"1\"\n");
         printf("\t-> For fixed for 1 year (fixed01) choose \"2\"\n");
         printf("\t-> For fixed for 2 years (fixed02) choose \"3\"\n");
         printf("\t-> For fixed for 3 years (fixed03) choose \"4\"\n\n");
-        printf("\tEnter your choice: ");
-    
-        if (scanf("%1d", &option2) != 1) {  // Validate input
-            printf("\n✖ Invalid input! Please enter a number between 0 and 4.\n");
-            clearInputBuffer();  // Clear invalid input
-            continue;
-        }
+        
+        option2 = getValidInteger("\tEnter your choice: ");
 
         // Assign account type based on choice
         switch (option2) {
@@ -332,29 +395,17 @@ void createNewAcc(struct User u)
                 printf("\n✖ Invalid choice! Please select a number between 0 and 4.\n");
                 continue;
         }
-
         // Valid account type selected, exit the loop
         break;
     }
-    // while (1){
-    //     printf("\nChoose the type of account:\n\t-> saving\n\t-> current\n\t-> fixed01(for 1 year)\n\t-> fixed02(for 2 years)\n\t-> fixed03(for 3 years)\n\n\tEnter your choice:");
-    //     scanf("%s", r.accountType);
-    //     if (strcmp(r.accountType, "saving") == 0 ||
-    //         strcmp(r.accountType, "current") == 0 ||
-    //         strcmp(r.accountType, "fixed01") == 0 ||
-    //         strcmp(r.accountType, "fixed02") == 0 ||
-    //         strcmp(r.accountType, "fixed03") == 0){
-    //             break;
-    //         }else{
-    //             printf("\n✖ Invalid account type! Please enter a valid account type.\n");
-    //         }
-    // }
-        
+
+    // Save account to file
     saveAccountToFile(pf, u, r);
 
     fclose(pf);
     success(u);
 }
+
 
 void checkAllAccounts(struct User u)
 {
