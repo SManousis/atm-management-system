@@ -1,2 +1,2 @@
-0 0 Alice 0 10/10/2012 Africa 291321234 22432.52 saving
+1 1 Alice 0 10/10/2012 Africa 291321234 22432.52 saving
 

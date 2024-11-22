@@ -635,14 +635,17 @@ void updateAcc(struct User u) {
                         break;
                 }
             } while (!exitUpdate);
-             
+            struct User tempUser;
             // After updating, write the updated record to tempFile
-            saveAccountToFile(tempFile, u, cr);
+            strcpy(tempUser.name, userName);
+            tempUser.id = cr.userId;
+            saveAccountToFile(tempFile, tempUser, cr);
         } else {
             
             // Write the original record to tempFile
             struct User tempUser;
             strcpy(tempUser.name, userName);
+            tempUser.id = cr.userId;
             saveAccountToFile(tempFile, tempUser, cr);
         }
     }
@@ -853,11 +856,14 @@ void accountTransaction(struct User u) {
                 while (getAccountFromFile(pf, tempUserName, &temp_cr)) {
                     struct User tempUser;
                     strcpy(tempUser.name, tempUserName);
+                    tempUser.id = cr.userId;
+                    //r.userId = cr.userId;
                     if (temp_cr.accountNbr == cr.accountNbr && strcmp(tempUserName, u.name) == 0) {
-                        // Save the updated record
-                        saveAccountToFile(tempFile, u, cr);
+                        
+                        saveAccountToFile(tempFile, tempUser, cr);
                     } else {
                         // Save other records unchanged
+                        
                         saveAccountToFile(tempFile, tempUser, temp_cr);
                     }
                 }
@@ -1052,7 +1058,8 @@ void transferAccount(struct User u) {
             }
 
             free(storedPassword);
-            while(1){
+            int var = 0;
+            while(var == 0){
                 // Ask for the new owner's username
                 printf("\nPlease enter the new owner's username or enter \"0\" to exit to the menu: ");
                 scanf("%49s", newOwner.name);
@@ -1075,10 +1082,11 @@ void transferAccount(struct User u) {
                     if (strcmp(newOwner.name, userChecker.name) == 0) {
                         userExists = 1;
                         newOwner.id = userChecker.id;
+                        var = 1;
                         break;
                     }
                 }
-
+                
                 fclose(userFile);
 
                 if (!userExists) {
@@ -1129,8 +1137,11 @@ void transferAccount(struct User u) {
                 perror("Error renaming the temporary file");
                 // Handle error if needed
             }
-
-            printf("\n✔ Account successfully transferred to %s!\n", newOwner.name);       
+            
+            printf("\n✔ Account successfully transferred to %s!\n", newOwner.name);
+            printf("Press enter to return to the main menu");
+            getchar();
+            getchar();       
             mainMenu(u);
             return;  // Ensure we exit the function after transfer
         }
@@ -1141,6 +1152,5 @@ void transferAccount(struct User u) {
     }
     fclose(pf);
 }
-
 
 
