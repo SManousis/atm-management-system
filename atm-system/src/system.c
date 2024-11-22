@@ -304,10 +304,11 @@ void createNewAcc(struct User u) {
     int validInput = 0;
 
     while (getAccountFromFile(pf, userName, &cr)) {
+        
         if (strcmp(userName, u.name) == 0 && cr.accountNbr == r.accountNbr) {
             printf("✖ This Account already exists for this user\n\n");
             printf("If you still want to make a new account, enter \"0\".\n");
-            printf("If you are an existing user and want to login, enter \"1\".\n");
+            printf("If you want to exit and go to the login menu, enter \"1\".\n");
             printf("Otherwise, enter \"2\" to exit the program.\n");
 
             do {
@@ -802,7 +803,7 @@ void accountTransaction(struct User u) {
 
                 printf("\nIf you want to make a deposit, please enter \"0\".\n");
                 printf("If you want to make a new withdrawal, please enter \"1\".\n");
-                printf("Otherwise, enter \"2\" to exit.\n");
+                printf("Otherwise, enter \"2\" to save the transactions and exit.\n");
                 int exitUpdate = 0;
                 do {
                     printf("Enter your choice: ");
@@ -876,6 +877,7 @@ void accountTransaction(struct User u) {
 
                 printf("\n✔ Account updated successfully!\n");
                 mainMenu(u);
+                return;
             }
         }
 
@@ -907,97 +909,100 @@ void accountRemoval(struct User u) {
 
     system("clear");
     int found = 0;
+    while(found == 0){
+        
+        printf("\nPlease enter the account number you want to delete (or enter \"0\" to exit): ");
+        scanf("%d", &r.accountNbr);
 
-    printf("\nPlease enter the account number you want to delete (or enter \"0\" to exit): ");
-    scanf("%d", &r.accountNbr);
+        if (r.accountNbr == 0) {
+            printf("Thank you for visiting us!\n");
+            fclose(pf);
+            mainMenu(u);
+            return;
+        }
 
-    if (r.accountNbr == 0) {
-        printf("Thank you for visiting us!\n");
-        fclose(pf);
-        return;
-    }
+        rewind(pf);  // Reset file pointer to start reading
+        while (getAccountFromFile(pf, userName, &cr)) {
+            if (cr.accountNbr == r.accountNbr && strcmp(userName, u.name) == 0) {
+                found = 1;
 
-    rewind(pf);  // Reset file pointer to start reading
-    while (getAccountFromFile(pf, userName, &cr)) {
-        if (cr.accountNbr == r.accountNbr && strcmp(userName, u.name) == 0) {
-            found = 1;
+                printf("\nYou want to delete account number: %d.\n", r.accountNbr);
+                printf("For safety reasons, please enter your password (or enter \"0\" to exit):");
+                getPasswordInputDeletion(u.password);
+                unsigned long hashedPassword = simpleHash(u.password);  // Hash entered password
+                char *storedPassword = getPassword(u);  // Get stored password as a string
+                unsigned long storedHash = strtoul(storedPassword, NULL, 10);
 
-            printf("\nYou want to delete account number: %d.\n", r.accountNbr);
-            printf("For safety reasons, please enter your password (or enter \"0\" to exit):");
-            getPasswordInputDeletion(u.password);
-            unsigned long hashedPassword = simpleHash(u.password);  // Hash entered password
-            char *storedPassword = getPassword(u);  // Get stored password as a string
-            unsigned long storedHash = strtoul(storedPassword, NULL, 10);
-
-            if (strcmp(u.password, "0") == 0) {
-                printf("\nThank you for visiting us!\n");
-                fclose(pf);
-                free(storedPassword);
-                return;
-            }
-
-            while (hashedPassword != storedHash) {
-                printf("\nWrong password. Please try again or enter \"0\" to exit: ");
-                getPasswordInputDeletion(u.password);  // Capture new password
-                hashedPassword = simpleHash(u.password);
                 if (strcmp(u.password, "0") == 0) {
                     printf("\nThank you for visiting us!\n");
                     fclose(pf);
                     free(storedPassword);
                     return;
                 }
-            }
 
-            if (cr.amount > 0) {
-                printf("\nThere is a remaining amount of $%.2f. The amount will be returned to the user after the account is closed.\n", cr.amount);
-                printf("Press Enter to continue");
-                getchar();
-                getchar();
-            }
-
-            // Skip writing this record to the new file
-            FILE *tempFile = fopen("temp.txt", "w");
-            if (tempFile == NULL) {
-                perror("Error creating temporary file");
-                fclose(pf);
-                return;
-            }
-
-            rewind(pf);  // Rewind original file pointer
-            char tempUserName[50];
-            struct Record temp_cr;
-            while (getAccountFromFile(pf, tempUserName, &temp_cr)) {
-                if (temp_cr.accountNbr != r.accountNbr) {  // Skip the record to be deleted
-                    struct User tempUser;
-                    strcpy(tempUser.name, tempUserName);
-                    saveAccountToFile(tempFile, tempUser, temp_cr);
+                while (hashedPassword != storedHash) {
+                    printf("\nWrong password. Please try again or enter \"0\" to exit: ");
+                    getPasswordInputDeletion(u.password);  // Capture new password
+                    hashedPassword = simpleHash(u.password);
+                    if (strcmp(u.password, "0") == 0) {
+                        printf("\nThank you for visiting us!\n");
+                        fclose(pf);
+                        free(storedPassword);
+                        return;
+                    }
                 }
+
+                if (cr.amount > 0) {
+                    printf("\nThere is a remaining amount of $%.2f. The amount will be returned to the user after the account is closed.\n", cr.amount);
+                    printf("Press Enter to continue");
+                    getchar();
+                    getchar();
+                }
+
+                // Skip writing this record to the new file
+                FILE *tempFile = fopen("temp.txt", "w");
+                if (tempFile == NULL) {
+                    perror("Error creating temporary file");
+                    fclose(pf);
+                    return;
+                }
+
+                rewind(pf);  // Rewind original file pointer
+                char tempUserName[50];
+                struct Record temp_cr;
+                while (getAccountFromFile(pf, tempUserName, &temp_cr)) {
+                    if (temp_cr.accountNbr != r.accountNbr) {  // Skip the record to be deleted
+                        struct User tempUser;
+                        strcpy(tempUser.name, tempUserName);
+                        saveAccountToFile(tempFile, tempUser, temp_cr);
+                    }
+                }
+
+                fclose(pf);
+                fclose(tempFile);
+                free(storedPassword);
+
+                if (remove(RECORDS) != 0) {
+                    perror("Error deleting the records file");
+                    // Handle error if needed
+                }
+
+                if (rename("temp.txt", RECORDS) != 0) {
+                    perror("Error renaming the temporary file");
+                    // Handle error if needed
+                }
+
+                printf("\n✔ Account deleted successfully!\n");
+                mainMenu(u);
+                return;  // Ensure the function exits after deleting the account
             }
+        }
 
-            fclose(pf);
-            fclose(tempFile);
-            free(storedPassword);
-
-            if (remove(RECORDS) != 0) {
-                perror("Error deleting the records file");
-                // Handle error if needed
-            }
-
-            if (rename("temp.txt", RECORDS) != 0) {
-                perror("Error renaming the temporary file");
-                // Handle error if needed
-            }
-
-            printf("\n✔ Account deleted successfully!\n");
-            mainMenu(u);
-            return;  // Ensure the function exits after deleting the account
+        if (!found) {
+            printf("\n✖ This account does not exist for this user. Please try again.\n");
+            
         }
     }
-
-    if (!found) {
-        printf("\n✖ This account does not exist for this user. Please try again.\n");
-    }
-
     fclose(pf);
 }
 

@@ -76,7 +76,9 @@ void initMenu(struct User *u)
                 char *storedPassword = getPassword(*u);
 
                 if (storedPassword == NULL) {
-                    printf("\t\t\t\t User not found! Please try again or register.\n");
+                    printf("\t\t\t\t User not found! Please try again.\n");
+                    printf("\t\t\t\t Press enter to continue.\n");
+                    getchar();
                     getchar();
                     continue;  // Loop back to prompt for username again
                 }
