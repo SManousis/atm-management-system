@@ -618,8 +618,9 @@ void updateAcc(struct User u) {
                         break;
                     }
                     case 1:
-                        printf("\nEnter the new phone number or enter \"0\" to remain unchanged: ");
-                        scanf("%d", &r.phone);
+                        //printf("\nEnter the new phone number or enter \"0\" to remain unchanged: ");
+                        clearInputBuffer();
+                        r.phone = getValidInteger("\nEnter the new phone number or enter \"0\" to remain unchanged: ");
                         if (r.phone != 0) {
                             cr.phone = r.phone;
                             printf("\nPhone number was updated.");  // Update phone
@@ -634,10 +635,11 @@ void updateAcc(struct User u) {
                         break;
                 }
             } while (!exitUpdate);
-
+             
             // After updating, write the updated record to tempFile
             saveAccountToFile(tempFile, u, cr);
         } else {
+            
             // Write the original record to tempFile
             struct User tempUser;
             strcpy(tempUser.name, userName);
@@ -867,7 +869,7 @@ void accountTransaction(struct User u) {
                 rename("temp.txt", RECORDS);
 
                 printf("\n✔ Account updated successfully!\n");
-                return;
+                mainMenu(u);
             }
         }
 
@@ -942,6 +944,9 @@ void accountRemoval(struct User u) {
 
             if (cr.amount > 0) {
                 printf("\nThere is a remaining amount of $%.2f. The amount will be returned to the user after the account is closed.\n", cr.amount);
+                printf("Press Enter to continue");
+                getchar();
+                getchar();
             }
 
             // Skip writing this record to the new file
