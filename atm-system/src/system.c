@@ -974,6 +974,7 @@ void accountRemoval(struct User u) {
                     if (temp_cr.accountNbr != r.accountNbr) {  // Skip the record to be deleted
                         struct User tempUser;
                         strcpy(tempUser.name, tempUserName);
+                        tempUser.id = cr.userId;
                         saveAccountToFile(tempFile, tempUser, temp_cr);
                     }
                 }
