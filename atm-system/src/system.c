@@ -803,7 +803,7 @@ void accountTransaction(struct User u) {
 
                 printf("\nIf you want to make a deposit, please enter \"0\".\n");
                 printf("If you want to make a new withdrawal, please enter \"1\".\n");
-                printf("Otherwise, enter \"2\" to save the transactions and exit.\n");
+                printf("Otherwise, enter \"2\" to exit.\n");
                 int exitUpdate = 0;
                 do {
                     printf("Enter your choice: ");
@@ -818,7 +818,7 @@ void accountTransaction(struct User u) {
                             printf("✔ Deposit successful! Your new total is $%.2f\n", cr.amount);
                             printf("\nIf you want to make a new deposit, please enter \"0\".\n");
                             printf("If you want to make a withdrawal, please enter \"1\".\n");
-                            printf("Otherwise, enter \"2\" to exit.\n");
+                            printf("Otherwise, enter \"2\" to save the transactions and exit.\n");
                             break;
 
                         case 1:  // Withdrawal
